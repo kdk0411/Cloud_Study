@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code_Compiler</title>
+    <style>
+        body {
+            background-color: darkgray;
+        }
+        textarea {
+            width:100%;
+            border: none;
+            resize: none;
+        }
+        input[type=submit] {
+            margin-top:10px;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            updateLanguageId();
+        };
+        document.addEventListener('keydown', (event) => {
+            console.log(event)
+            if (event.ctrlKey && event.key === 'F10') {
+                send_text();
+            }
+        });
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+          }
+
+        function updateLanguageId() {
+            var selectedLanguageId = document.getElementById('lang').value;
+            document.getElementById('language_id').value = selectedLanguageId;
+            var inputCodeTextarea = document.getElementById('input_code');
+
+            if (selectedLanguageId === '71') {
+                inputCodeTextarea.value = 'print("Hello world")';
+            } else if (selectedLanguageId === '50') {
+                inputCodeTextarea.value = '#include <stdio.h>\nvoid main() {\n    printf("Hello world");\n}';
+            }
+            else {
+                document.getElementById('input_code').value = '';
+            }
+            document.getElementById('output_code').value = '';
+        }
+
+        function send_text(){
+            var in_code = document.getElementById('input_code').value;
+            var selectedLanguageId = document.getElementById('lang').value;
+            var requestBody = "source_code=" + encodeURIComponent(in_code) + "&language_id=" + encodeURIComponent(selectedLanguageId);
+
+            fetch("http://34.22.65.169/submissions/?base64_encode=false&wait=true", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: requestBody
+            })
+            .then(response => response.json())
+            .then(data => {
+                var out_code = document.getElementById('output_code');
+                if(data.stdout){
+                    out_code.value = data.stdout;
+                }
+                else if(data.stderr){
+                    out_code.value = data.stderr;
+                }
+                else{
+                    out_code.value = 'Error';
+                }
+            })
+        }
+    </script>
+</head>
+<body><div>
+    Language
+    <select name="languages" id="lang" onchange="updateLanguageId()" style="width: 180px; background-color: gray">
+        <option value="71" mode="python">Python (3.8.1)</option>
+        <option value="50" mode="c">C (GCC 9.2.0)</option>
+        <option value="1023" mode="csharp">C# Test (.NET Core SDK 3.1.302, NUnit 3.12.0)</option>
+        <option value="1012" mode="cpp">C++ Test (GCC 8.4.0, Google Test 1.8.1)</option>
+        <option value="62" mode="java">Java (OpenJDK 13.0.1)</option>
+        <option value="63" mode="javascript">JavaScript (Node.js 12.14.0)</option>
+        <option value="78" mode="kotlin">Kotlin (1.3.70)</option>
+    </select>
+</div>
+    Code<br>
+    <div>
+        <form name="input" method="post">
+            <input type="button" value="run" onclick="send_text()"/>
+            <textarea id="input_code" cols="30" rows="25" style="background-color: silver;"
+            onkeyup="autoResize(this)" onkeydown="autoResize(this)"></textarea><br/>
+        </form>
+    </div>
+
+    <div>
+        <input type="hidden" id="language_id" name="language_id" value="71">
+        <form name="output">
+            Result<br/>
+            <textarea id="output_code" cols="30" rows="5" readonly style="background-color: silver;"onkeyup="autoResize(this)"
+             onkeydown="autoResize(this)"></textarea><br/>
+        </form>
+    </div>
+</body>
+</html>
