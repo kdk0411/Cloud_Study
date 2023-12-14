@@ -1,4 +1,4 @@
-# Cloud_Study
+# Code_Compiler
 
 ## GCP
   Google Cloud Platform을 사용하여 해당 프로젝트를 진행 하였습니다.
